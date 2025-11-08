@@ -1,0 +1,36 @@
+name: Build Windows EXE and ZIP
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          pip install pyqt5 requests pyinstaller
+      - name: Build EXE
+        run: |
+          pyinstaller --onefile --windowed main2.py
+      - name: Zip EXE
+        run: |
+          cd dist
+          powershell Compress-Archive -Path main2.exe -DestinationPath main2.zip
+          cd ..
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: main2-build
+          path: |
+            dist/main2.exe
+            dist/main2.zip
